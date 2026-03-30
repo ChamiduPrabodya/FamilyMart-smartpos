@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Products</title>
+</head>
+<body>
+
+<h1>Product List</h1>
+
+<a href="/">Home</a>
+<br><br>
+
+<table border="1" cellpadding="10">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Stock</th>
+    </tr>
+
+    {{range .}}
+    <tr>
+        <td>{{.ID}}</td>
+        <td>{{.Name}}</td>
+        <td>{{.Price}}</td>
+        <td>{{.Stock}}</td>
+    </tr>
+    {{end}}
+
+</table>
+
+</body>
+</html>
