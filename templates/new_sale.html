@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Sale</title>
+</head>
+<body>
+
+<h1>New Sale</h1>
+
+<a href="/">Home</a> |
+<a href="/products">Products</a> |
+<a href="/sales">Sales</a>
+<br><br>
+
+{{if .Error}}
+<p style="color:red">{{.Error}}</p>
+{{end}}
+
+{{if not .Products}}
+<p>No products available. Add products first.</p>
+{{else}}
+<form method="POST" action="/sale/new">
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Qty</th>
+        </tr>
+        {{range .Products}}
+        <tr>
+            <td>{{.ID}}</td>
+            <td>{{.Name}}</td>
+            <td>{{.Price}}</td>
+            <td>{{.Stock}}</td>
+            <td><input type="number" name="qty_{{.ID}}" min="0" max="{{.Stock}}" value="0"></td>
+        </tr>
+        {{end}}
+    </table>
+    <br>
+    <button type="submit">Complete Sale</button>
+</form>
+{{end}}
+
+</body>
+</html>
+

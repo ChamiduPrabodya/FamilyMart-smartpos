@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sales</title>
+</head>
+<body>
+
+<h1>Sales History</h1>
+
+<a href="/">Home</a> |
+<a href="/products">Products</a> |
+<a href="/sale/new">New Sale</a>
+<br><br>
+
+{{if not .Sales}}
+<p>No sales yet.</p>
+{{end}}
+
+{{range .Sales}}
+    <h3>Sale</h3>
+    <ul>
+        {{range .Items}}
+            <li>{{.Product.Name}} (ID {{.Product.ID}}) - Price {{.Product.Price}} x{{.Quantity}}</li>
+        {{end}}
+    </ul>
+    <strong>Total: {{.Total}}</strong>
+    <hr>
+{{end}}
+
+</body>
+</html>
