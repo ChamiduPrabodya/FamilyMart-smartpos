@@ -1,33 +1,89 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Products</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Products • Green Archade</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+<div class="app-shell">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/">
+                <span class="brand-badge" aria-hidden="true"></span>
+                <span>Green Archade</span>
+            </a>
+            <nav class="nav">
+                <a href="/products">Products</a>
+                <a href="/products/add">Add Product</a>
+                <a href="/sale/new">New Sale</a>
+                <a href="/sales">Sales</a>
+            </nav>
+        </div>
+    </header>
 
-<h1>Product List</h1>
+    <main class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Products</h1>
+                <p class="page-subtitle">Inventory list (ID, name, price, and stock).</p>
+            </div>
+            <div class="actions">
+                <a class="btn" href="/sale/new">New Sale</a>
+                <a class="btn btn-primary" href="/products/add">Add Product</a>
+            </div>
+        </div>
 
-<a href="/">Home</a>
-<br><br>
+        <div class="card">
+            <div class="card-inner">
+                {{if not .}}
+                <p style="margin:0;color:var(--muted)">No products yet. Add your first item to start selling.</p>
+                {{else}}
+                <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th style="width:90px">ID</th>
+                        <th>Name</th>
+                        <th style="width:160px">Price</th>
+                        <th style="width:140px">Stock</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{range .}}
+                    <tr>
+                        <td class="muted">{{.ID}}</td>
+                        <td>{{.Name}}</td>
+                        <td class="muted">{{.Price}}</td>
+                        <td class="muted">{{.Stock}}</td>
+                    </tr>
+                    {{end}}
+                    </tbody>
+                </table>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </main>
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Price</th>
-        <th>Stock</th>
-    </tr>
-
-    {{range .}}
-    <tr>
-        <td>{{.ID}}</td>
-        <td>{{.Name}}</td>
-        <td>{{.Price}}</td>
-        <td>{{.Stock}}</td>
-    </tr>
-    {{end}}
-
-</table>
-
+    <footer class="footer">
+        <div class="footer-inner">
+            <span>Green Archade</span>
+            <span>Inventory</span>
+        </div>
+    </footer>
+</div>
+<script>
+  (function () {
+    var path = window.location.pathname || "/";
+    var links = document.querySelectorAll(".nav a[href]");
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute("href") || "";
+      if (href === "/" && path === "/") links[i].classList.add("active");
+      else if (href !== "/" && path.indexOf(href) === 0) links[i].classList.add("active");
+    }
+  })();
+</script>
 </body>
 </html>

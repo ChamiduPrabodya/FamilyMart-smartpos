@@ -1,18 +1,97 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>POS System</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Green Archade POS</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+<div class="app-shell">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/">
+                <span class="brand-badge" aria-hidden="true"></span>
+                <span>Green Archade</span>
+            </a>
+            <nav class="nav">
+                <a href="/products">Products </a>
+                <a href="/products/add">Add Product</a>
+                <a href="/sale/new">New Sale</a>
+                <a href="/sales">Sales</a>
+            </nav>
+        </div>
+    </header>
 
-    <h1>Welcome to POS System 🚀</h1>
+    <main class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-subtitle">Quick actions for inventory, checkout, and sales history.</p>
+            </div>
+            <div class="actions">
+                <a class="btn btn-primary" href="/sale/new">New Sale</a>
+                <a class="btn" href="/products/add">Add Product</a>
+            </div>
+        </div>
 
-    <ul>
-        <li><a href="/products">View Products</a></li>
-        <li><a href="/products/add">Add Product</a></li>
-        <li><a href="/sales">View Sales</a></li>
-        <li><a href="/sale/new">New Sale</a></li>
-    </ul>
+        <div class="grid">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-inner">
+                        <h2 style="margin:0 0 6px">Inventory</h2>
+                        <p style="margin:0;color:var(--muted)">Keep track of parts, peripherals, and stock.</p>
+                        <div class="actions" style="margin-top:14px;justify-content:flex-start">
+                            <a class="btn" href="/products">View Products</a>
+                            <a class="btn btn-primary" href="/products/add">Add Product</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-inner">
+                        <h2 style="margin:0 0 6px">Checkout</h2>
+                        <p style="margin:0;color:var(--muted)">Create a new sale and automatically reduce stock.</p>
+                        <div class="actions" style="margin-top:14px;justify-content:flex-start">
+                            <a class="btn btn-primary" href="/sale/new">New Sale</a>
+                            <a class="btn" href="/sales">View Sales</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-inner">
+                        <h2 style="margin:0 0 6px">Computer Shop Examples</h2>
+                        <p style="margin:0;color:var(--muted)">
+                            Use names like “DDR5 16GB 5600MHz”, “NVMe SSD 1TB”, “RTX 4060 8GB”, “650W PSU”, “Gaming Mouse”.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <span>Green Archade</span>
+            <span>Local JSON storage</span>
+        </div>
+    </footer>
+</div>
+<script>
+  (function () {
+    var path = window.location.pathname || "/";
+    var links = document.querySelectorAll(".nav a[href]");
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute("href") || "";
+      if (href === "/" && path === "/") links[i].classList.add("active");
+      else if (href !== "/" && path.indexOf(href) === 0) links[i].classList.add("active");
+    }
+  })();
+</script>
 </body>
 </html>

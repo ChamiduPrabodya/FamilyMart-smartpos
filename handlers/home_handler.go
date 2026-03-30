@@ -2,20 +2,25 @@ package handlers
 
 import (
 	"html/template"
+	"io/fs"
 	"net/http"
-	"path/filepath"
+	"os"
 	"sync"
 )
 
 type TemplateRenderer struct {
-	dir   string
+	fs    fs.FS
 	mu    sync.RWMutex
 	cache map[string]*template.Template
 }
 
 func NewTemplateRenderer(dir string) *TemplateRenderer {
+	return NewTemplateRendererFS(os.DirFS(dir))
+}
+
+func NewTemplateRendererFS(fsys fs.FS) *TemplateRenderer {
 	return &TemplateRenderer{
-		dir:   dir,
+		fs:    fsys,
 		cache: map[string]*template.Template{},
 	}
 }
@@ -49,7 +54,7 @@ func (r *TemplateRenderer) get(name string) (*template.Template, error) {
 		return cached, nil
 	}
 
-	tmpl, err := template.ParseFiles(filepath.Join(r.dir, name))
+	tmpl, err := template.ParseFS(r.fs, name)
 	if err != nil {
 		return nil, err
 	}

@@ -1,48 +1,111 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>New Sale</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>New Sale • Green Archade</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+<div class="app-shell">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/">
+                <span class="brand-badge" aria-hidden="true"></span>
+                <span>Green Archade</span>
+            </a>
+            <nav class="nav">
+                <a href="/products">Products</a>
+                <a href="/products/add">Add Product</a>
+                <a href="/sale/new">New Sale</a>
+                <a href="/sales">Sales</a>
+            </nav>
+        </div>
+    </header>
 
-<h1>New Sale</h1>
+    <main class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">New Sale</h1>
+                <p class="page-subtitle">Enter quantities and complete checkout.</p>
+            </div>
+            <div class="actions">
+                <a class="btn" href="/products">View Products</a>
+                <a class="btn" href="/sales">Sales History</a>
+            </div>
+        </div>
 
-<a href="/">Home</a> |
-<a href="/products">Products</a> |
-<a href="/sales">Sales</a>
-<br><br>
-
-{{if .Error}}
-<p style="color:red">{{.Error}}</p>
-{{end}}
-
-{{if not .Products}}
-<p>No products available. Add products first.</p>
-{{else}}
-<form method="POST" action="/sale/new">
-    <table border="1" cellpadding="10">
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Qty</th>
-        </tr>
-        {{range .Products}}
-        <tr>
-            <td>{{.ID}}</td>
-            <td>{{.Name}}</td>
-            <td>{{.Price}}</td>
-            <td>{{.Stock}}</td>
-            <td><input type="number" name="qty_{{.ID}}" min="0" max="{{.Stock}}" value="0"></td>
-        </tr>
+        {{if .Error}}
+        <div class="alert alert-error">{{.Error}}</div>
         {{end}}
-    </table>
-    <br>
-    <button type="submit">Complete Sale</button>
-</form>
-{{end}}
 
+        {{if not .Products}}
+        <div class="card">
+            <div class="card-inner">
+                <p style="margin:0;color:var(--muted)">No products available. Add products first.</p>
+                <div class="actions" style="justify-content:flex-start;margin-top:14px">
+                    <a class="btn btn-primary" href="/products/add">Add Product</a>
+                </div>
+            </div>
+        </div>
+        {{else}}
+        <form method="POST" action="/sale/new">
+            <div class="card">
+                <div class="card-inner">
+                    <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width:90px">ID</th>
+                            <th>Item</th>
+                            <th style="width:160px">Price</th>
+                            <th style="width:140px">Stock</th>
+                            <th style="width:140px">Qty</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{range .Products}}
+                        <tr>
+                            <td class="muted">{{.ID}}</td>
+                            <td>{{.Name}}</td>
+                            <td class="muted">{{.Price}}</td>
+                            <td class="muted">{{.Stock}}</td>
+                            <td>
+                                <input type="number" name="qty_{{.ID}}" min="0" max="{{.Stock}}" value="0">
+                            </td>
+                        </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                    </div>
+
+                    <div class="actions" style="justify-content:flex-start;margin-top:14px">
+                        <button class="btn btn-primary" type="submit">Complete Sale</button>
+                        <a class="btn" href="/products">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+        {{end}}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <span>Green Archade</span>
+            <span>Checkout</span>
+        </div>
+    </footer>
+</div>
+<script>
+  (function () {
+    var path = window.location.pathname || "/";
+    var links = document.querySelectorAll(".nav a[href]");
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute("href") || "";
+      if (href === "/" && path === "/") links[i].classList.add("active");
+      else if (href !== "/" && path.indexOf(href) === 0) links[i].classList.add("active");
+    }
+  })();
+</script>
 </body>
 </html>
-

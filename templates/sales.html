@@ -1,31 +1,107 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sales</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sales • Green Archade</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+<div class="app-shell">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/">
+                <span class="brand-badge" aria-hidden="true"></span>
+                <span>Green Archade</span>
+            </a>
+            <nav class="nav">
+                <a href="/products">Products</a>
+                <a href="/products/add">Add Product</a>
+                <a href="/sale/new">New Sale</a>
+                <a href="/sales">Sales</a>
+            </nav>
+        </div>
+    </header>
 
-<h1>Sales History</h1>
+    <main class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Sales</h1>
+                <p class="page-subtitle">Transaction history (items and totals).</p>
+            </div>
+            <div class="actions">
+                <a class="btn btn-primary" href="/sale/new">New Sale</a>
+            </div>
+        </div>
 
-<a href="/">Home</a> |
-<a href="/products">Products</a> |
-<a href="/sale/new">New Sale</a>
-<br><br>
+        {{if not .Sales}}
+        <div class="card">
+            <div class="card-inner">
+                <p style="margin:0;color:var(--muted)">No sales yet. Create your first sale to see it here.</p>
+                <div class="actions" style="justify-content:flex-start;margin-top:14px">
+                    <a class="btn btn-primary" href="/sale/new">Create Sale</a>
+                </div>
+            </div>
+        </div>
+        {{else}}
+            {{range .Sales}}
+            <div class="card" style="margin-bottom:14px">
+                <div class="card-inner">
+                    <div class="page-header" style="margin:0 0 12px">
+                        <div>
+                            <h2 style="margin:0;font-size:18px">Sale</h2>
+                            <p class="page-subtitle" style="margin-top:4px">Items: {{len .Items}}</p>
+                        </div>
+                        <div class="actions">
+                            <span class="btn" style="cursor:default">Total: {{.Total}}</span>
+                        </div>
+                    </div>
 
-{{if not .Sales}}
-<p>No sales yet.</p>
-{{end}}
-
-{{range .Sales}}
-    <h3>Sale</h3>
-    <ul>
-        {{range .Items}}
-            <li>{{.Product.Name}} (ID {{.Product.ID}}) - Price {{.Product.Price}} x{{.Quantity}}</li>
+                    <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width:90px">ID</th>
+                            <th>Item</th>
+                            <th style="width:160px">Price</th>
+                            <th style="width:120px">Qty</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{range .Items}}
+                        <tr>
+                            <td class="muted">{{.Product.ID}}</td>
+                            <td>{{.Product.Name}}</td>
+                            <td class="muted">{{.Product.Price}}</td>
+                            <td class="muted">{{.Quantity}}</td>
+                        </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+            {{end}}
         {{end}}
-    </ul>
-    <strong>Total: {{.Total}}</strong>
-    <hr>
-{{end}}
+    </main>
 
+    <footer class="footer">
+        <div class="footer-inner">
+            <span>Green Archade</span>
+            <span>Sales</span>
+        </div>
+    </footer>
+</div>
+<script>
+  (function () {
+    var path = window.location.pathname || "/";
+    var links = document.querySelectorAll(".nav a[href]");
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute("href") || "";
+      if (href === "/" && path === "/") links[i].classList.add("active");
+      else if (href !== "/" && path.indexOf(href) === 0) links[i].classList.add("active");
+    }
+  })();
+</script>
 </body>
 </html>
