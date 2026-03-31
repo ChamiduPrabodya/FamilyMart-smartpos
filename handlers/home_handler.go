@@ -12,16 +12,30 @@ type TemplateRenderer struct {
 	fs    fs.FS
 	mu    sync.RWMutex
 	cache map[string]*template.Template
+
+	disableCache bool
 }
 
 func NewTemplateRenderer(dir string) *TemplateRenderer {
 	return NewTemplateRendererFS(os.DirFS(dir))
 }
 
+func NewTemplateRendererNoCache(dir string) *TemplateRenderer {
+	return NewTemplateRendererFSNoCache(os.DirFS(dir))
+}
+
 func NewTemplateRendererFS(fsys fs.FS) *TemplateRenderer {
 	return &TemplateRenderer{
 		fs:    fsys,
 		cache: map[string]*template.Template{},
+	}
+}
+
+func NewTemplateRendererFSNoCache(fsys fs.FS) *TemplateRenderer {
+	return &TemplateRenderer{
+		fs:           fsys,
+		cache:        map[string]*template.Template{},
+		disableCache: true,
 	}
 }
 
@@ -40,6 +54,10 @@ func (r *TemplateRenderer) Render(w http.ResponseWriter, name string, data any) 
 }
 
 func (r *TemplateRenderer) get(name string) (*template.Template, error) {
+	if r.disableCache {
+		return template.ParseFS(r.fs, name)
+	}
+
 	r.mu.RLock()
 	cached := r.cache[name]
 	r.mu.RUnlock()

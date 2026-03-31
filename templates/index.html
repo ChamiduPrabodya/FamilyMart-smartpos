@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Green Archade POS</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>FamilyMart Supermarket POS</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20260331">
 </head>
 <body>
 <div class="app-shell">
@@ -12,86 +12,57 @@
         <div class="topbar-inner">
             <a class="brand" href="/">
                 <span class="brand-badge" aria-hidden="true"></span>
-                <span>Green Archade</span>
+                <span class="brand-name">FamilyMart</span>
+                <span class="brand-sub">Supermarket POS</span>
             </a>
             <nav class="nav">
-                <a href="/products">Products </a>
-                <a href="/products/add">Add Product</a>
-                <a href="/sale/new">New Sale</a>
-                <a href="/sales">Sales</a>
+                <a href="#checkout">Checkout</a>
+                <a href="#inventory">Inventory</a>
+                <a href="#reports">Reports</a>
+                <a href="#customers">Customers</a>
+                <a href="#employees">Employees</a>
+                <a href="#insights">Insights</a>
             </nav>
+            <div class="topbar-meta" aria-label="Status">
+                <span class="pill">Counter 01</span>
+                <span class="pill pill-muted" data-live-clock>--</span>
+            </div>
         </div>
     </header>
 
     <main class="container">
         <div class="page-header">
             <div>
-                <h1 class="page-title">Dashboard</h1>
-                <p class="page-subtitle">Quick actions for inventory, checkout, and sales history.</p>
+                <h1 class="page-title">POS Frontend Dashboard</h1>
+                <p class="page-subtitle">Sell items, manage inventory, track sales & profits, manage customers, and track employees.</p>
             </div>
             <div class="actions">
-                <a class="btn btn-primary" href="/sale/new">New Sale</a>
-                <a class="btn" href="/products/add">Add Product</a>
+                <button class="btn btn-primary" type="button" data-action="reset-demo">Reset Demo Data</button>
+                <button class="btn btn-accent" type="button" data-action="export-demo">Export JSON</button>
             </div>
         </div>
 
-        <div class="grid">
-            <div class="col-6">
-                <div class="card">
-                    <div class="card-inner">
-                        <h2 style="margin:0 0 6px">Inventory</h2>
-                        <p style="margin:0;color:var(--muted)">Keep track of parts, peripherals, and stock.</p>
-                        <div class="actions" style="margin-top:14px;justify-content:flex-start">
-                            <a class="btn" href="/products">View Products</a>
-                            <a class="btn btn-primary" href="/products/add">Add Product</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-6">
-                <div class="card">
-                    <div class="card-inner">
-                        <h2 style="margin:0 0 6px">Checkout</h2>
-                        <p style="margin:0;color:var(--muted)">Create a new sale and automatically reduce stock.</p>
-                        <div class="actions" style="margin-top:14px;justify-content:flex-start">
-                            <a class="btn btn-primary" href="/sale/new">New Sale</a>
-                            <a class="btn" href="/sales">View Sales</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-inner">
-                        <h2 style="margin:0 0 6px">Computer Shop Examples</h2>
-                        <p style="margin:0;color:var(--muted)">
-                            Use names like “DDR5 16GB 5600MHz”, “NVMe SSD 1TB”, “RTX 4060 8GB”, “650W PSU”, “Gaming Mouse”.
-                        </p>
-                    </div>
-                </div>
-            </div>
+        <div class="alert">
+            <strong>Frontend-only demo:</strong>
+            all data is stored in your browser (<span class="muted">localStorage</span>) and updates in real time as you sell/restock.
         </div>
+
+        <div id="posApp" class="pos-app" aria-label="POS dashboard"></div>
     </main>
 
     <footer class="footer">
         <div class="footer-inner">
-            <span>Green Archade</span>
-            <span>Local JSON storage</span>
+            <span>FamilyMart Supermarket POS</span>
+            <span>Frontend demo - localStorage</span>
         </div>
     </footer>
 </div>
-<script>
-  (function () {
-    var path = window.location.pathname || "/";
-    var links = document.querySelectorAll(".nav a[href]");
-    for (var i = 0; i < links.length; i++) {
-      var href = links[i].getAttribute("href") || "";
-      if (href === "/" && path === "/") links[i].classList.add("active");
-      else if (href !== "/" && path.indexOf(href) === 0) links[i].classList.add("active");
-    }
-  })();
-</script>
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-relevant="additions"></div>
+<noscript>
+    <div class="container">
+        <div class="alert alert-error">This dashboard needs JavaScript enabled.</div>
+    </div>
+</noscript>
+<script src="/static/js/dashboard.js?v=20260331"></script>
 </body>
 </html>

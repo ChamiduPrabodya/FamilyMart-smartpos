@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>New Sale • Green Archade</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>New Sale • FamilyMart</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20260331">
 </head>
 <body>
 <div class="app-shell">
@@ -12,7 +12,8 @@
         <div class="topbar-inner">
             <a class="brand" href="/">
                 <span class="brand-badge" aria-hidden="true"></span>
-                <span>Green Archade</span>
+                <span class="brand-name">FamilyMart</span>
+                <span class="brand-sub">Supermarket POS</span>
             </a>
             <nav class="nav">
                 <a href="/products">Products</a>
@@ -20,6 +21,10 @@
                 <a href="/sale/new">New Sale</a>
                 <a href="/sales">Sales</a>
             </nav>
+            <div class="topbar-meta" aria-label="Status">
+                <span class="pill">Counter 01</span>
+                <span class="pill pill-muted" data-live-clock>--</span>
+            </div>
         </div>
     </header>
 
@@ -27,10 +32,10 @@
         <div class="page-header">
             <div>
                 <h1 class="page-title">New Sale</h1>
-                <p class="page-subtitle">Enter quantities and complete checkout.</p>
+                <p class="page-subtitle">Search items, enter quantities, then complete checkout.</p>
             </div>
             <div class="actions">
-                <a class="btn" href="/products">View Products</a>
+                <a class="btn btn-accent" href="/products">Products</a>
                 <a class="btn" href="/sales">Sales History</a>
             </div>
         </div>
@@ -50,40 +55,79 @@
         </div>
         {{else}}
         <form method="POST" action="/sale/new">
-            <div class="card">
-                <div class="card-inner">
-                    <div class="table-wrap">
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th style="width:90px">ID</th>
-                            <th>Item</th>
-                            <th style="width:160px">Price</th>
-                            <th style="width:140px">Stock</th>
-                            <th style="width:140px">Qty</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{range .Products}}
-                        <tr>
-                            <td class="muted">{{.ID}}</td>
-                            <td>{{.Name}}</td>
-                            <td class="muted">{{.Price}}</td>
-                            <td class="muted">{{.Stock}}</td>
-                            <td>
-                                <input type="number" name="qty_{{.ID}}" min="0" max="{{.Stock}}" value="0">
-                            </td>
-                        </tr>
-                        {{end}}
-                        </tbody>
-                    </table>
-                    </div>
+            <div class="checkout-layout">
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="toolbar">
+                            <div class="toolbar-left">
+                                <div class="field" style="margin:0">
+                                    <div class="label">Search</div>
+                                    <input id="productSearch" type="text" placeholder="Search by name or ID…" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="toolbar-right muted">
+                                Tip: Use the Qty column for checkout
+                            </div>
+                        </div>
 
-                    <div class="actions" style="justify-content:flex-start;margin-top:14px">
-                        <button class="btn btn-primary" type="submit">Complete Sale</button>
-                        <a class="btn" href="/products">Cancel</a>
+                        <div class="table-wrap">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th style="width:90px">ID</th>
+                                    <th>Item</th>
+                                    <th style="width:140px">Price</th>
+                                    <th style="width:110px">Stock</th>
+                                    <th style="width:120px">Qty</th>
+                                    <th style="width:140px">Line Total</th>
+                                </tr>
+                                </thead>
+                                <tbody id="saleRows">
+                                {{range .Products}}
+                                <tr class="sale-row" data-id="{{.ID}}" data-name="{{.Name}}" data-price="{{.Price}}">
+                                    <td class="muted">{{.ID}}</td>
+                                    <td>{{.Name}}</td>
+                                    <td class="muted">{{.Price}}</td>
+                                    <td class="muted">{{.Stock}}</td>
+                                    <td>
+                                        <input class="qty-input" type="number" name="qty_{{.ID}}" min="0" max="{{.Stock}}" value="0" inputmode="numeric">
+                                    </td>
+                                    <td class="muted" data-line-total>0.00</td>
+                                </tr>
+                                {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="actions" style="justify-content:flex-start;margin-top:14px">
+                            <button class="btn btn-primary btn-lg" type="submit">Complete Sale</button>
+                            <a class="btn" href="/products">Cancel</a>
+                        </div>
                     </div>
                 </div>
+
+                <aside class="card checkout-summary sticky">
+                    <div class="card-inner">
+                        <h2 style="margin:0 0 10px;font-size:16px">Summary</h2>
+
+                        <div class="summary-row">
+                            <div class="summary-label">Items</div>
+                            <div class="summary-value" id="sumItems">0</div>
+                        </div>
+                        <div class="summary-row">
+                            <div class="summary-label">Total Qty</div>
+                            <div class="summary-value" id="sumQty">0</div>
+                        </div>
+                        <div class="summary-row">
+                            <div class="summary-label">Subtotal</div>
+                            <div class="summary-value" id="sumSubtotal">0.00</div>
+                        </div>
+
+                        <div class="alert" style="margin-top:12px">
+                            Totals here are a quick preview. Final total is calculated on checkout.
+                        </div>
+                    </div>
+                </aside>
             </div>
         </form>
         {{end}}
@@ -91,7 +135,7 @@
 
     <footer class="footer">
         <div class="footer-inner">
-            <span>Green Archade</span>
+            <span>FamilyMart Supermarket POS</span>
             <span>Checkout</span>
         </div>
     </footer>
@@ -105,6 +149,86 @@
       if (href === "/" && path === "/") links[i].classList.add("active");
       else if (href !== "/" && path.indexOf(href) === 0) links[i].classList.add("active");
     }
+
+    var clock = document.querySelector("[data-live-clock]");
+    if (clock) {
+      var tick = function () {
+        clock.textContent = new Date().toLocaleString();
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    var parseMoney = function (value) {
+      if (value == null) return 0;
+      var cleaned = String(value).replace(/[^0-9.\-]/g, "");
+      var n = parseFloat(cleaned);
+      return isNaN(n) ? 0 : n;
+    };
+
+    var formatMoney = function (n) {
+      try {
+        return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      } catch (e) {
+        return String(Math.round(n * 100) / 100);
+      }
+    };
+
+    var rows = document.querySelectorAll(".sale-row");
+    var qtyInputs = document.querySelectorAll(".qty-input");
+    var itemsEl = document.getElementById("sumItems");
+    var qtyEl = document.getElementById("sumQty");
+    var subtotalEl = document.getElementById("sumSubtotal");
+    var search = document.getElementById("productSearch");
+
+    var updateTotals = function () {
+      var items = 0;
+      var qty = 0;
+      var subtotal = 0;
+
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var price = parseMoney(row.getAttribute("data-price"));
+        var input = row.querySelector(".qty-input");
+        var q = parseInt(input && input.value ? input.value : "0", 10);
+        if (isNaN(q) || q < 0) q = 0;
+
+        if (q > 0) items++;
+        qty += q;
+        var lineTotal = price * q;
+        subtotal += lineTotal;
+
+        var lineCell = row.querySelector("[data-line-total]");
+        if (lineCell) lineCell.textContent = formatMoney(lineTotal);
+      }
+
+      if (itemsEl) itemsEl.textContent = String(items);
+      if (qtyEl) qtyEl.textContent = String(qty);
+      if (subtotalEl) subtotalEl.textContent = formatMoney(subtotal);
+    };
+
+    var applySearch = function () {
+      if (!search) return;
+      var q = (search.value || "").trim().toLowerCase();
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        if (!q) {
+          row.style.display = "";
+          continue;
+        }
+        var id = String(row.getAttribute("data-id") || "").toLowerCase();
+        var name = String(row.getAttribute("data-name") || "").toLowerCase();
+        row.style.display = (id.indexOf(q) !== -1 || name.indexOf(q) !== -1) ? "" : "none";
+      }
+    };
+
+    for (var i = 0; i < qtyInputs.length; i++) {
+      qtyInputs[i].addEventListener("input", updateTotals);
+      qtyInputs[i].addEventListener("change", updateTotals);
+    }
+    if (search) search.addEventListener("input", applySearch);
+
+    updateTotals();
   })();
 </script>
 </body>

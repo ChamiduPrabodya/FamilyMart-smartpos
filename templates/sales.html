@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sales • Green Archade</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Sales • FamilyMart</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20260331">
 </head>
 <body>
 <div class="app-shell">
@@ -12,7 +12,8 @@
         <div class="topbar-inner">
             <a class="brand" href="/">
                 <span class="brand-badge" aria-hidden="true"></span>
-                <span>Green Archade</span>
+                <span class="brand-name">FamilyMart</span>
+                <span class="brand-sub">Supermarket POS</span>
             </a>
             <nav class="nav">
                 <a href="/products">Products</a>
@@ -20,6 +21,10 @@
                 <a href="/sale/new">New Sale</a>
                 <a href="/sales">Sales</a>
             </nav>
+            <div class="topbar-meta" aria-label="Status">
+                <span class="pill">Counter 01</span>
+                <span class="pill pill-muted" data-live-clock>--</span>
+            </div>
         </div>
     </header>
 
@@ -58,26 +63,26 @@
                     </div>
 
                     <div class="table-wrap">
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th style="width:90px">ID</th>
-                            <th>Item</th>
-                            <th style="width:160px">Price</th>
-                            <th style="width:120px">Qty</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{range .Items}}
-                        <tr>
-                            <td class="muted">{{.Product.ID}}</td>
-                            <td>{{.Product.Name}}</td>
-                            <td class="muted">{{.Product.Price}}</td>
-                            <td class="muted">{{.Quantity}}</td>
-                        </tr>
-                        {{end}}
-                        </tbody>
-                    </table>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th style="width:90px">ID</th>
+                                <th>Item</th>
+                                <th style="width:160px">Price</th>
+                                <th style="width:120px">Qty</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range .Items}}
+                            <tr>
+                                <td class="muted">{{.Product.ID}}</td>
+                                <td>{{.Product.Name}}</td>
+                                <td class="muted">{{.Product.Price}}</td>
+                                <td class="muted">{{.Quantity}}</td>
+                            </tr>
+                            {{end}}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -87,7 +92,7 @@
 
     <footer class="footer">
         <div class="footer-inner">
-            <span>Green Archade</span>
+            <span>FamilyMart Supermarket POS</span>
             <span>Sales</span>
         </div>
     </footer>
@@ -100,6 +105,15 @@
       var href = links[i].getAttribute("href") || "";
       if (href === "/" && path === "/") links[i].classList.add("active");
       else if (href !== "/" && path.indexOf(href) === 0) links[i].classList.add("active");
+    }
+
+    var clock = document.querySelector("[data-live-clock]");
+    if (clock) {
+      var tick = function () {
+        clock.textContent = new Date().toLocaleString();
+      };
+      tick();
+      setInterval(tick, 1000);
     }
   })();
 </script>
