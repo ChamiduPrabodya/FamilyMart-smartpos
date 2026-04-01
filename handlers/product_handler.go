@@ -80,4 +80,3 @@ func AddProductHandler(renderer *TemplateRenderer, productService *services.Prod
 		}
 	}
 }
-

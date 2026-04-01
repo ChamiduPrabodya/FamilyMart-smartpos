@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>POS Admin • FamilyMart</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20260401">
+</head>
+<body>
+<div class="app-shell">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/">
+                <span class="brand-badge" aria-hidden="true"></span>
+                <span class="brand-name">FamilyMart</span>
+                <span class="brand-sub">Admin</span>
+            </a>
+            <nav class="nav">
+                <a href="/cashier">Cashier</a>
+                <a href="/admin">Admin</a>
+                <a href="/products">Legacy Products</a>
+                <a href="/sales">Legacy Sales</a>
+            </nav>
+            <div class="topbar-meta" aria-label="Status">
+                <span class="pill">Back Office</span>
+                <span class="pill pill-muted" data-live-clock>--</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Admin Dashboard</h1>
+                <p class="page-subtitle">Inventory, reports, employees, and business insights.</p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-primary" type="button" data-action="reset-demo">Reset Demo Data</button>
+                <button class="btn btn-accent" type="button" data-action="export-demo">Export JSON</button>
+            </div>
+        </div>
+
+        <div class="alert">
+            <strong>Frontend-only demo:</strong>
+            all data is stored in your browser (<span class="muted">localStorage</span>).
+        </div>
+
+        <div id="posApp" class="pos-app" aria-label="Admin dashboard"></div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <span>FamilyMart Supermarket POS</span>
+            <span>Admin • localStorage demo</span>
+        </div>
+    </footer>
+</div>
+
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-relevant="additions"></div>
+<noscript>
+    <div class="container">
+        <div class="alert alert-error">This dashboard needs JavaScript enabled.</div>
+    </div>
+</noscript>
+<script>
+  (function () {
+    var clock = document.querySelector("[data-live-clock]");
+    if (clock) {
+      var tick = function () { clock.textContent = new Date().toLocaleString(); };
+      tick();
+      setInterval(tick, 1000);
+    }
+    var path = window.location.pathname || "/";
+    var links = document.querySelectorAll(".nav a[href]");
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute("href") || "";
+      links[i].classList.toggle("active", href && href !== "/" && path.indexOf(href) === 0);
+    }
+  })();
+</script>
+<script src="/static/js/dashboard.js?v=20260401-1"></script>
+</body>
+</html>

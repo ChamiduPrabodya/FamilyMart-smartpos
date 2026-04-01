@@ -60,6 +60,8 @@ func main() {
 	}
 	mux.Handle("/static/", staticHandler)
 	mux.HandleFunc("/", handlers.HomeHandler(renderer))
+	mux.HandleFunc("/cashier", handlers.CashierHandler(renderer))
+	mux.HandleFunc("/admin", handlers.AdminHandler(renderer))
 	mux.HandleFunc("/products", handlers.ProductsHandler(renderer, productService))
 	mux.HandleFunc("/products/add", handlers.AddProductHandler(renderer, productService))
 	mux.HandleFunc("/sales", handlers.SalesHandler(renderer, saleService))

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>POS Cashier • FamilyMart</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20260401-4">
+</head>
+<body>
+<div class="app-shell">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/">
+                <span class="brand-badge" aria-hidden="true"></span>
+                <span class="brand-name">FamilyMart</span>
+                <span class="brand-sub">Cashier</span>
+            </a>
+            <nav class="nav">
+                <a href="/cashier">Cashier</a>
+                <a href="/admin">Admin</a>
+                <a href="/products">Legacy Products</a>
+                <a href="/sales">Legacy Sales</a>
+            </nav>
+            <div class="topbar-meta" aria-label="Status">
+                <span class="pill" id="registerPill">Register 01</span>
+                <span class="pill pill-muted" data-live-clock>--</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Cashier Checkout</h1>
+                <p class="page-subtitle">Scan items, manage cart, accept payments, print receipts.</p>
+            </div>
+            <div class="actions">
+                <button class="btn" type="button" data-action="new-sale">New Sale</button>
+                <button class="btn" type="button" data-action="hold-sale">Hold</button>
+                <button class="btn btn-accent" type="button" data-action="recall-sale">Recall</button>
+            </div>
+        </div>
+
+        <div id="cashierApp" aria-label="Cashier application"></div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <span>FamilyMart Supermarket POS</span>
+            <span>Cashier • localStorage demo</span>
+        </div>
+    </footer>
+</div>
+
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-relevant="additions"></div>
+<noscript>
+    <div class="container">
+        <div class="alert alert-error">This cashier screen needs JavaScript enabled.</div>
+    </div>
+</noscript>
+<script>
+  (function () {
+    var clock = document.querySelector("[data-live-clock]");
+    if (clock) {
+      var tick = function () { clock.textContent = new Date().toLocaleString(); };
+      tick();
+      setInterval(tick, 1000);
+    }
+    var path = window.location.pathname || "/";
+    var links = document.querySelectorAll(".nav a[href]");
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute("href") || "";
+      links[i].classList.toggle("active", href && href !== "/" && path.indexOf(href) === 0);
+    }
+  })();
+</script>
+<script src="/static/js/cashier.js?v=20260401-4"></script>
+</body>
+</html>

@@ -91,4 +91,3 @@ func NewSaleHandler(renderer *TemplateRenderer, productService *services.Product
 		}
 	}
 }
-

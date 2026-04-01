@@ -55,7 +55,6 @@
     return {
       settings: { currency: DEFAULT_CURRENCY },
       products: [],
-      customers: [],
       employees: [],
       sales: [],
       cart: {
@@ -63,7 +62,6 @@
         discount: 0,
         taxRate: 0,
         cashierId: "",
-        customerId: "",
         payMethod: "cash",
         cashTendered: ""
       }
@@ -90,18 +88,10 @@
         { id: uid("emp"), name: "Manager 01", role: "Manager" }
       ];
     }
-    if (!state.customers || state.customers.length === 0) {
-      state.customers = [{ id: uid("cus"), name: "Walk-in", phone: "", email: "", points: 0, createdAt: nowISO() }];
-    }
     if (!state.sales) state.sales = [];
     if (!state.cart) state.cart = defaultState().cart;
     if (!state.cart.items) state.cart.items = [];
     if (!state.cart.payMethod) state.cart.payMethod = "cash";
-    if (!state.cart.customerId) {
-      for (var i = 0; i < state.customers.length; i++) {
-        if (state.customers[i].name === "Walk-in") state.cart.customerId = state.customers[i].id;
-      }
-    }
     if (!state.cart.cashierId && state.employees[0]) state.cart.cashierId = state.employees[0].id;
   }
 
@@ -131,10 +121,10 @@
 
   function normalizeHashTab() {
     var hash = (window.location.hash || "").replace("#", "").trim().toLowerCase();
-    if (!hash) return "checkout";
-    var ok = ["checkout", "inventory", "reports", "customers", "employees", "insights"];
+    if (!hash) return "inventory";
+    var ok = ["inventory", "reports", "employees", "insights"];
     for (var i = 0; i < ok.length; i++) if (ok[i] === hash) return hash;
-    return "checkout";
+    return "inventory";
   }
 
   function initClock() {
@@ -161,17 +151,13 @@
   function renderShell(root) {
     root.innerHTML = [
       '<div class="tabs" role="tablist" aria-label="Dashboard Sections">',
-      '  <button class="tab-btn active" type="button" role="tab" aria-selected="true" data-tab="checkout">Checkout</button>',
-      '  <button class="tab-btn" type="button" role="tab" aria-selected="false" data-tab="inventory">Inventory</button>',
+      '  <button class="tab-btn active" type="button" role="tab" aria-selected="true" data-tab="inventory">Inventory</button>',
       '  <button class="tab-btn" type="button" role="tab" aria-selected="false" data-tab="reports">Reports</button>',
-      '  <button class="tab-btn" type="button" role="tab" aria-selected="false" data-tab="customers">Customers</button>',
       '  <button class="tab-btn" type="button" role="tab" aria-selected="false" data-tab="employees">Employees</button>',
       '  <button class="tab-btn" type="button" role="tab" aria-selected="false" data-tab="insights">Insights</button>',
       "</div>",
-      '<section class="tab-panel" data-panel="checkout"></section>',
       '<section class="tab-panel" data-panel="inventory" hidden></section>',
       '<section class="tab-panel" data-panel="reports" hidden></section>',
-      '<section class="tab-panel" data-panel="customers" hidden></section>',
       '<section class="tab-panel" data-panel="employees" hidden></section>',
       '<section class="tab-panel" data-panel="insights" hidden></section>'
     ].join("\n");
@@ -207,11 +193,6 @@
 
   function getEmployeeById(state, id) {
     for (var i = 0; i < state.employees.length; i++) if (state.employees[i].id === id) return state.employees[i];
-    return null;
-  }
-
-  function getCustomerById(state, id) {
-    for (var i = 0; i < state.customers.length; i++) if (state.customers[i].id === id) return state.customers[i];
     return null;
   }
 
@@ -267,24 +248,18 @@
   }
 
   function renderAll(root, state) {
-    var checkout = root.querySelector('.tab-panel[data-panel="checkout"]');
     var inventory = root.querySelector('.tab-panel[data-panel="inventory"]');
     var reports = root.querySelector('.tab-panel[data-panel="reports"]');
-    var customers = root.querySelector('.tab-panel[data-panel="customers"]');
     var employees = root.querySelector('.tab-panel[data-panel="employees"]');
     var insights = root.querySelector('.tab-panel[data-panel="insights"]');
 
-    if (checkout) checkout.innerHTML = checkoutPanelHtml();
     if (inventory) inventory.innerHTML = inventoryPanelHtml();
     if (reports) reports.innerHTML = reportsPanelHtml();
-    if (customers) customers.innerHTML = customersPanelHtml();
     if (employees) employees.innerHTML = employeesPanelHtml();
     if (insights) insights.innerHTML = insightsPanelHtml();
 
-    renderCheckoutDynamic(root, state);
     renderInventoryDynamic(root, state);
     renderReportsDynamic(root, state);
-    renderCustomersDynamic(root, state);
     renderEmployeesDynamic(root, state);
     renderInsightsDynamic(root, state);
 
@@ -293,7 +268,7 @@
 
   function checkoutPanelHtml() {
     return [
-      '<div class="checkout-layout">',
+      '<div class="checkout-layout cashier-layout">',
       '  <div class="card"><div class="card-inner">',
       '    <div class="panel-head">',
       '      <div><h2 class="panel-title">Sell products or services</h2><p class="panel-sub">Scan items, auto totals, and accept cash/card/QR.</p></div>',
@@ -301,8 +276,8 @@
       "    </div>",
       '    <div class="form-row">',
       '      <div class="field" style="margin:0">',
-      '        <label class="label" for="scanInput">Scan SKU / barcode</label>',
-      '        <input id="scanInput" type="text" autocomplete="off" placeholder="Example: FM-0001 (press Enter)" />',
+        '        <label class="label" for="scanInput">Scan SKU / barcode</label>',
+      '        <div class="scan-row"><button class="scan-btn" type="button" data-action="focus-scan" aria-label="Scan input">▦</button><input id="scanInput" type="text" autocomplete="off" placeholder="Example: FM-0001 (press Enter)" /></div>',
       "      </div>",
       '      <div class="field" style="margin:0">',
       '        <label class="label" for="quickPick">Quick pick (name)</label>',
@@ -310,7 +285,7 @@
       '        <datalist id="productList"></datalist>',
       "      </div>",
       '      <div class="field" style="margin:0;align-self:end">',
-      '        <button class="btn btn-primary" type="button" data-action="add-quick-pick">Add</button>',
+      '        <button class="btn btn-primary" type="button" data-action="add-scan">Confirm</button>',
       "      </div>",
       "    </div>",
       '    <div class="table-wrap" style="margin-top:14px">',
@@ -319,21 +294,32 @@
       '        <tbody id="cartTbody"></tbody>',
       "      </table>",
       "    </div>",
+      '    <div class="charge-bar">',
+      '      <div class="charge-meta">',
+      '        <div class="charge-kv"><span class="muted">Quantity</span><strong id="sumQty">0</strong></div>',
+      '        <div class="charge-kv"><span class="muted">Total</span><strong id="chargeTotal">-</strong></div>',
+      "      </div>",
+      '      <button class="btn btn-accent btn-lg charge-btn" type="button" data-action="complete-sale">Charge <span class="charge-amount" id="chargeAmount">-</span></button>',
+      "    </div>",
       '    <p class="muted" style="margin:10px 0 0">Inventory reduces automatically when you complete a sale.</p>',
       "  </div></div>",
       '  <div class="card checkout-summary sticky"><div class="card-inner">',
       '    <h2 class="panel-title">Payment</h2>',
+      '    <div class="payment-stats" aria-label="Payment summary">',
+      '      <div class="payment-row"><span class="muted">Payment due</span><strong id="payDue">-</strong></div>',
+      '      <div class="payment-row"><span class="muted">Payment received</span><strong id="payReceived">-</strong></div>',
+      '      <div class="payment-row"><span class="muted">Change</span><strong id="payChange">-</strong></div>',
+      "    </div>",
       '    <div class="field"><label class="label" for="cashierSelect">Cashier / employee</label><select id="cashierSelect" class="select"></select></div>',
-      '    <div class="field"><label class="label" for="customerSelect">Customer (optional)</label><select id="customerSelect" class="select"></select><div class="mini muted" id="customerMeta"></div></div>',
       '    <div class="grid" style="align-items:end">',
       '      <div class="col-6"><div class="field"><label class="label" for="taxRate">Tax %</label><input id="taxRate" type="number" min="0" step="0.01" value="0" /></div></div>',
       '      <div class="col-6"><div class="field"><label class="label" for="discount">Discount</label><input id="discount" type="number" min="0" step="0.01" value="0" /><div class="mini muted">Discount amount</div></div></div>',
       "    </div>",
       '    <div class="summary">',
-      '      <div class="summary-row"><span class="summary-label">Subtotal</span><span class="summary-value" id="sumSubtotal">—</span></div>',
-      '      <div class="summary-row"><span class="summary-label">Tax</span><span class="summary-value" id="sumTax">—</span></div>',
-      '      <div class="summary-row"><span class="summary-label">Discount</span><span class="summary-value" id="sumDiscount">—</span></div>',
-      '      <div class="summary-row"><span class="summary-label">Total</span><span class="summary-value" id="sumTotal">—</span></div>',
+      '      <div class="summary-row"><span class="summary-label">Subtotal</span><span class="summary-value" id="sumSubtotal">-</span></div>',
+      '      <div class="summary-row"><span class="summary-label">Tax</span><span class="summary-value" id="sumTax">-</span></div>',
+      '      <div class="summary-row"><span class="summary-label">Discount</span><span class="summary-value" id="sumDiscount">-</span></div>',
+      '      <div class="summary-row"><span class="summary-label">Total</span><span class="summary-value" id="sumTotal">-</span></div>',
       "    </div>",
       '    <div class="field" style="margin-top:12px">',
       '      <span class="label">Payment method</span>',
@@ -343,10 +329,36 @@
       '        <label class="segmented-item"><input type="radio" name="payMethod" value="qr" /><span>QR</span></label>',
       "      </div>",
       "    </div>",
-      '    <div class="field" id="cashTenderField"><label class="label" for="cashTendered">Cash received</label><input id="cashTendered" type="number" min="0" step="0.01" placeholder="0.00" /><div class="mini" id="cashChangeMeta"></div></div>',
+      '    <div class="field" id="cashTenderField"><label class="label" for="cashTendered">Cash received</label><input id="cashTendered" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" /><div class="mini" id="cashChangeMeta"></div></div>',
+      '    <div class="keypad" aria-label="Numeric keypad">',
+      '      <div class="keypad-grid">',
+      '        <button class="key" type="button" data-action="keypad" data-key="1">1</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="2">2</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="3">3</button>',
+      '        <button class="key key-cancel" type="button" data-action="keypad-cancel">Cancel</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="4">4</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="5">5</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="6">6</button>',
+      '        <button class="key key-delete" type="button" data-action="keypad-delete">Delete</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="7">7</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="8">8</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="9">9</button>',
+      '        <button class="key key-enter" type="button" data-action="keypad-enter">Enter</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="0">0</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="00">00</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key=".">.</button>',
+      '        <button class="key" type="button" data-action="keypad" data-key="000">000</button>',
+      "      </div>",
+      "    </div>",
       '    <div class="actions" style="justify-content:stretch;margin-top:12px"><button class="btn btn-primary btn-lg" type="button" style="flex:1" data-action="complete-sale">Complete Sale</button></div>',
-      '    <div class="receipt" style="margin-top:14px"><div class="mini muted">Receipt preview</div><pre class="receipt-box" id="receiptPreview" aria-label="Receipt preview">—</pre></div>',
+      '    <div class="receipt" style="margin-top:14px"><div class="mini muted">Receipt preview</div><pre class="receipt-box" id="receiptPreview" aria-label="Receipt preview">-</pre></div>',
       "  </div></div>",
+      '  <div class="cashier-rail" aria-label="Quick actions">',
+      '    <button class="rail-btn" type="button" title="Payment">💳</button>',
+      '    <button class="rail-btn" type="button" title="Barcode">▦</button>',
+      '    <button class="rail-btn" type="button" title="Inventory">📦</button>',
+      '    <button class="rail-btn rail-gear" type="button" title="Settings">⚙</button>',
+      "  </div>",
       "</div>"
     ].join("\n");
   }
@@ -422,30 +434,6 @@
     ].join("\n");
   }
 
-  function customersPanelHtml() {
-    return [
-      '<div class="card"><div class="card-inner">',
-      '  <div class="panel-head"><div><h2 class="panel-title">Manage customers</h2><p class="panel-sub">Save details, track purchase history, loyalty discounts.</p></div></div>',
-      '  <div class="grid" style="align-items:start">',
-      '    <div class="col-6"><div class="card soft"><div class="card-inner">',
-      '      <h3 class="panel-title" style="margin:0 0 10px">Add customer</h3>',
-      '      <div class="field"><label class="label" for="cName">Name</label><input id="cName" type="text" placeholder="Customer name" /></div>',
-      '      <div class="field"><label class="label" for="cPhone">Phone</label><input id="cPhone" type="text" placeholder="+94..." /></div>',
-      '      <div class="field"><label class="label" for="cEmail">Email</label><input id="cEmail" type="text" placeholder="name@example.com" /></div>',
-      '      <div class="actions" style="justify-content:flex-start"><button class="btn btn-primary" type="button" data-action="add-customer">Add Customer</button></div>',
-      '      <p class="muted" style="margin:10px 0 0">Loyalty: earn 1 point per 100 in sales.</p>',
-      "    </div></div></div>",
-      '    <div class="col-6"><div class="card soft"><div class="card-inner">',
-      '      <h3 class="panel-title" style="margin:0 0 10px">Customers</h3>',
-      '      <div class="field"><label class="label" for="customerSearch">Search</label><input id="customerSearch" type="text" placeholder="Search by name or phone..." /></div>',
-      '      <div class="table-wrap"><table class="table" aria-label="Customer list"><thead><tr><th>Name</th><th>Phone</th><th>Points</th><th></th></tr></thead><tbody id="customersTbody"></tbody></table></div>',
-      '      <div class="mini muted" id="customerHistoryMeta" style="margin-top:10px"></div>',
-      "    </div></div></div>",
-      "  </div>",
-      "</div></div>"
-    ].join("\n");
-  }
-
   function employeesPanelHtml() {
     return [
       '<div class="card"><div class="card-inner">',
@@ -504,15 +492,7 @@
     }
 
     var cashier = root.querySelector("#cashierSelect");
-    if (cashier) renderSelectOptions(cashier, state.employees, function (e) { return e.name + (e.role ? (" • " + e.role) : ""); }, state.cart.cashierId, "");
-
-    var customer = root.querySelector("#customerSelect");
-    if (customer) {
-      renderSelectOptions(customer, state.customers, function (c) {
-        var pts = Math.max(0, Math.floor(safeNumber(c.points, 0)));
-        return c.name + (c.name === "Walk-in" ? "" : (" • " + pts + " pts"));
-      }, state.cart.customerId, "");
-    }
+    if (cashier) renderSelectOptions(cashier, state.employees, function (e) { return e.name + (e.role ? (" - " + e.role) : ""); }, state.cart.cashierId, "");
 
     var taxRate = root.querySelector("#taxRate");
     if (taxRate) taxRate.value = String(safeNumber(state.cart.taxRate, 0));
@@ -567,9 +547,22 @@
     setText("sumDiscount", fmtMoney(state, t.discount));
     setText("sumTotal", fmtMoney(state, t.total));
 
+    var qtySum = 0;
+    for (var i = 0; i < state.cart.items.length; i++) qtySum += Math.max(0, Math.floor(safeNumber(state.cart.items[i].qty, 0)));
+    setText("sumQty", String(qtySum));
+    setText("chargeTotal", fmtMoney(state, t.total));
+    setText("chargeAmount", fmtMoney(state, t.total));
+
     var method = state.cart.payMethod || "cash";
+    var received = method === "cash" ? safeNumber(state.cart.cashTendered, 0) : 0;
+    var changeAmount = received - t.total;
+    setText("payDue", fmtMoney(state, t.total));
+    setText("payReceived", fmtMoney(state, received));
+    setText("payChange", fmtMoney(state, Math.max(0, changeAmount)));
     var cashField = root.querySelector("#cashTenderField");
     if (cashField) cashField.hidden = method !== "cash";
+    var keypad = root.querySelector(".keypad");
+    if (keypad) keypad.hidden = method !== "cash";
 
     var changeMeta = root.querySelector("#cashChangeMeta");
     if (changeMeta) {
@@ -579,13 +572,6 @@
         var change = tender - t.total;
         changeMeta.textContent = (t.total <= 0) ? "Add items to checkout." : ("Change: " + fmtMoney(state, Math.max(0, change)));
       }
-    }
-
-    var customerMeta = root.querySelector("#customerMeta");
-    if (customerMeta) {
-      var c = getCustomerById(state, state.cart.customerId);
-      if (!c || c.name === "Walk-in") customerMeta.textContent = "No customer selected.";
-      else customerMeta.textContent = "Points: " + Math.max(0, Math.floor(safeNumber(c.points, 0))) + " • Redeem via Discount field.";
     }
 
     renderReceipt(root, state);
@@ -600,8 +586,6 @@
     lines.push(new Date().toLocaleString());
     var emp = getEmployeeById(state, state.cart.cashierId);
     if (emp) lines.push("Cashier: " + emp.name);
-    var cust = getCustomerById(state, state.cart.customerId);
-    if (cust && cust.name && cust.name !== "Walk-in") lines.push("Customer: " + cust.name);
     lines.push("--------------------------------");
     if (!state.cart.items.length) lines.push("(no items)");
     else {
@@ -744,43 +728,6 @@
       ch += '<div class="bar" title="' + hr + ':00 • ' + v + ' tx"><div class="bar-fill" style="height:' + pct + '%"></div><div class="bar-label">' + hr + "</div></div>";
     }
     chart.innerHTML = ch;
-  }
-
-  function renderCustomersDynamic(root, state) {
-    var tbody = root.querySelector("#customersTbody");
-    if (!tbody) return;
-    var search = root.querySelector("#customerSearch");
-    var q = search ? String(search.value || "").toLowerCase() : "";
-    var html = "";
-    for (var i = 0; i < state.customers.length; i++) {
-      var c = state.customers[i];
-      if (c.name === "Walk-in") continue;
-      var hay = (c.name + " " + (c.phone || "")).toLowerCase();
-      if (q && hay.indexOf(q) === -1) continue;
-      html += "<tr>";
-      html += "<td>" + escapeHtml(c.name) + "</td>";
-      html += '<td class="muted">' + escapeHtml(c.phone || "—") + "</td>";
-      html += "<td><strong>" + Math.max(0, Math.floor(safeNumber(c.points, 0))) + "</strong></td>";
-      html += '<td style="text-align:right"><button class="btn" type="button" data-action="select-customer" data-cid="' + escapeHtml(c.id) + '">Select</button></td>';
-      html += "</tr>";
-    }
-    tbody.innerHTML = html || '<tr><td class="muted" colspan="4">No customers yet.</td></tr>';
-
-    var meta = root.querySelector("#customerHistoryMeta");
-    if (meta) {
-      var sel = getCustomerById(state, state.cart.customerId);
-      if (!sel || sel.name === "Walk-in") meta.textContent = "Select a customer to see purchase history.";
-      else {
-        var count = 0, spent = 0;
-        for (var s = 0; s < state.sales.length; s++) {
-          if (state.sales[s].customerId === sel.id) {
-            count += 1;
-            spent += safeNumber(state.sales[s].total, 0);
-          }
-        }
-        meta.textContent = sel.name + " • Purchases: " + count + " • Spent: " + fmtMoney(state, spent);
-      }
-    }
   }
 
   function renderEmployeesDynamic(root, state) {
@@ -944,21 +891,6 @@
       toast("Product added.", "success");
     }
 
-    function addCustomerFromForm() {
-      var nameEl = document.getElementById("cName");
-      var phoneEl = document.getElementById("cPhone");
-      var emailEl = document.getElementById("cEmail");
-      var name = (nameEl ? nameEl.value : "").trim();
-      if (!name) return toast("Customer name is required.", "danger");
-      var c = { id: uid("cus"), name: name, phone: (phoneEl ? phoneEl.value : "").trim(), email: (emailEl ? emailEl.value : "").trim(), points: 0, createdAt: nowISO() };
-      state.customers.push(c);
-      state.cart.customerId = c.id;
-      if (nameEl) nameEl.value = "";
-      if (phoneEl) phoneEl.value = "";
-      if (emailEl) emailEl.value = "";
-      toast("Customer added.", "success");
-    }
-
     function addEmployeeFromForm() {
       var nameEl = document.getElementById("eName");
       var roleEl = document.getElementById("eRole");
@@ -1003,17 +935,10 @@
         lines.push({ productId: p2.id, name: p2.name, sku: p2.sku, qty: qty2, unitPrice: safeNumber(p2.price, 0), unitCost: safeNumber(p2.cost, 0), lineTotal: lineTotal, lineProfit: lineProfit });
       }
 
-      var customer = getCustomerById(state, state.cart.customerId);
-      if (customer && customer.name !== "Walk-in") {
-        var earned = Math.floor(totals.total / 100);
-        customer.points = Math.max(0, Math.floor(safeNumber(customer.points, 0))) + Math.max(0, earned);
-      }
-
       state.sales.push({
         id: uid("sale"),
         createdAt: nowISO(),
         employeeId: state.cart.cashierId || "",
-        customerId: state.cart.customerId || "",
         payMethod: state.cart.payMethod || "cash",
         subtotal: totals.subtotal,
         tax: totals.tax,
@@ -1039,17 +964,16 @@
         return;
       }
       if (action === "reset-demo") {
-        if (!confirm("Reset demo data? This clears products/customers/employees/sales.")) return;
+        if (!confirm("Reset demo data? This clears products/employees/sales.")) return;
         var next = defaultState();
         seedIfEmpty(next);
         state.settings = next.settings;
         state.products = next.products;
-        state.customers = next.customers;
         state.employees = next.employees;
         state.sales = next.sales;
         state.cart = next.cart;
         REPORT_RANGE = "today";
-        window.location.hash = "#checkout";
+        window.location.hash = "#inventory";
         toast("Demo reset.", "success");
         rerender();
         return;
@@ -1057,6 +981,56 @@
 
       if (!appRoot) return;
       if (!appRoot.contains(btn) && action !== "export-demo" && action !== "reset-demo") return;
+
+      if (action === "focus-scan") {
+        var scan = document.getElementById("scanInput");
+        if (scan) scan.focus();
+        return;
+      }
+
+      if (action === "add-scan") {
+        var scanInput = document.getElementById("scanInput");
+        var sku = scanInput ? String(scanInput.value || "").trim() : "";
+        if (!sku) return toast("Enter a SKU first.", "danger");
+        var prod = getProductBySku(state, sku);
+        if (!prod) return toast("Unknown SKU: " + sku, "danger");
+        addToCart(prod.id, 1);
+        if (scanInput) scanInput.value = "";
+        rerender();
+        toast("Added: " + prod.name, "success");
+        return;
+      }
+
+      if (action === "keypad" || action === "keypad-cancel" || action === "keypad-delete" || action === "keypad-enter") {
+        if ((state.cart.payMethod || "cash") !== "cash") {
+          toast("Keypad is for Cash payments.", "danger");
+          return;
+        }
+
+        var current = String(state.cart.cashTendered || "");
+        if (action === "keypad-cancel") current = "";
+        if (action === "keypad-delete") current = current.slice(0, Math.max(0, current.length - 1));
+        if (action === "keypad") {
+          var key = btn.getAttribute("data-key") || "";
+          if (key === ".") {
+            if (current.indexOf(".") === -1) current = (current ? current : "0") + ".";
+          } else {
+            current += key;
+          }
+        }
+        if (action === "keypad-enter") {
+          completeSale();
+          rerender();
+          return;
+        }
+
+        state.cart.cashTendered = current;
+        saveState(state);
+        var cashTendered = document.getElementById("cashTendered");
+        if (cashTendered) cashTendered.value = current;
+        if (appRoot) renderCheckoutSummary(appRoot, state);
+        return;
+      }
 
       if (action === "clear-cart") {
         state.cart.items = [];
@@ -1119,18 +1093,6 @@
         toast("Report range: " + REPORT_RANGE, "success");
         return;
       }
-      if (action === "add-customer") {
-        addCustomerFromForm();
-        rerender();
-        return;
-      }
-      if (action === "select-customer") {
-        var cid = btn.getAttribute("data-cid") || "";
-        state.cart.customerId = cid;
-        rerender();
-        toast("Customer selected.", "success");
-        return;
-      }
       if (action === "add-employee") {
         addEmployeeFromForm();
         rerender();
@@ -1141,16 +1103,34 @@
     document.addEventListener("keydown", function (e) {
       if (e.key !== "Enter") return;
       var input = e.target;
-      if (!input || input.id !== "scanInput") return;
-      e.preventDefault();
-      var sku = String(input.value || "").trim();
-      if (!sku) return;
-      var p = getProductBySku(state, sku);
-      if (!p) return toast("Unknown SKU: " + sku, "danger");
-      addToCart(p.id, 1);
-      input.value = "";
-      rerender();
-      toast("Added: " + p.name, "success");
+      if (!input) return;
+
+      if (input.id === "scanInput") {
+        e.preventDefault();
+        var sku = String(input.value || "").trim();
+        if (!sku) return;
+        var p = getProductBySku(state, sku);
+        if (!p) return toast("Unknown SKU: " + sku, "danger");
+        addToCart(p.id, 1);
+        input.value = "";
+        rerender();
+        toast("Added: " + p.name, "success");
+        return;
+      }
+
+      if (input.id === "quickPick") {
+        e.preventDefault();
+        var name = String(input.value || "").trim();
+        if (!name) return;
+        var found = null;
+        for (var i = 0; i < state.products.length; i++) if (state.products[i].name === name) { found = state.products[i]; break; }
+        if (!found) return toast("Pick from the list.", "danger");
+        addToCart(found.id, 1);
+        input.value = "";
+        rerender();
+        toast("Added: " + found.name, "success");
+        return;
+      }
     });
 
     document.addEventListener("input", function (e) {
@@ -1190,10 +1170,6 @@
         return;
       }
 
-      if (el.id === "customerSearch") {
-        if (appRoot) renderCustomersDynamic(appRoot, state);
-        return;
-      }
     });
 
     document.addEventListener("change", function (e) {
@@ -1204,15 +1180,6 @@
         state.cart.cashierId = el.value || "";
         saveState(state);
         if (appRoot) renderReceipt(appRoot, state);
-        return;
-      }
-      if (el.id === "customerSelect") {
-        state.cart.customerId = el.value || "";
-        saveState(state);
-        if (appRoot) {
-          renderCheckoutSummary(appRoot, state);
-          renderCustomersDynamic(appRoot, state);
-        }
         return;
       }
       if (el.name === "payMethod") {

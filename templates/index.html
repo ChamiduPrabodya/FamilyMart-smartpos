@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FamilyMart Supermarket POS</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260331">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260401">
 </head>
 <body>
 <div class="app-shell">
@@ -16,12 +16,10 @@
                 <span class="brand-sub">Supermarket POS</span>
             </a>
             <nav class="nav">
-                <a href="#checkout">Checkout</a>
-                <a href="#inventory">Inventory</a>
-                <a href="#reports">Reports</a>
-                <a href="#customers">Customers</a>
-                <a href="#employees">Employees</a>
-                <a href="#insights">Insights</a>
+                <a href="/cashier">Cashier</a>
+                <a href="/admin">Admin</a>
+                <a href="/products">Legacy Products</a>
+                <a href="/sales">Legacy Sales</a>
             </nav>
             <div class="topbar-meta" aria-label="Status">
                 <span class="pill">Counter 01</span>
@@ -33,36 +31,69 @@
     <main class="container">
         <div class="page-header">
             <div>
-                <h1 class="page-title">POS Frontend Dashboard</h1>
-                <p class="page-subtitle">Sell items, manage inventory, track sales & profits, manage customers, and track employees.</p>
+                <h1 class="page-title">Welcome</h1>
+                <p class="page-subtitle">Choose a mode: Cashier checkout or Admin management.</p>
             </div>
             <div class="actions">
-                <button class="btn btn-primary" type="button" data-action="reset-demo">Reset Demo Data</button>
-                <button class="btn btn-accent" type="button" data-action="export-demo">Export JSON</button>
+                <a class="btn btn-primary" href="/cashier">Open Cashier</a>
+                <a class="btn btn-accent" href="/admin">Open Admin</a>
             </div>
         </div>
 
-        <div class="alert">
-            <strong>Frontend-only demo:</strong>
-            all data is stored in your browser (<span class="muted">localStorage</span>) and updates in real time as you sell/restock.
+        <div class="grid">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-inner">
+                        <h2 style="margin:0 0 6px">Cashier Mode</h2>
+                        <p class="muted" style="margin:0">Fast checkout UI: scan items, keypad cash input, charge, receipt.</p>
+                        <div class="actions" style="margin-top:14px;justify-content:flex-start">
+                            <a class="btn btn-primary" href="/cashier">Start Checkout</a>
+                            <a class="btn" href="/sale/new">Legacy Checkout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-inner">
+                        <h2 style="margin:0 0 6px">Admin Mode</h2>
+                        <p class="muted" style="margin:0">Inventory, low-stock alerts, reports, employees, insights.</p>
+                        <div class="actions" style="margin-top:14px;justify-content:flex-start">
+                            <a class="btn btn-accent" href="/admin">Open Admin</a>
+                            <a class="btn" href="/products">Legacy Products</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="posApp" class="pos-app" aria-label="POS dashboard"></div>
+        <div class="alert" style="margin-top:14px">
+            <strong>Note:</strong> Cashier/Admin pages are frontend-only demos (browser localStorage). Legacy pages use server JSON files.
+        </div>
     </main>
 
     <footer class="footer">
         <div class="footer-inner">
             <span>FamilyMart Supermarket POS</span>
-            <span>Frontend demo - localStorage</span>
+            <span>Frontend demo</span>
         </div>
     </footer>
 </div>
-<div class="toast-stack" id="toastStack" aria-live="polite" aria-relevant="additions"></div>
-<noscript>
-    <div class="container">
-        <div class="alert alert-error">This dashboard needs JavaScript enabled.</div>
-    </div>
-</noscript>
-<script src="/static/js/dashboard.js?v=20260331"></script>
+<script>
+  (function () {
+    var clock = document.querySelector("[data-live-clock]");
+    if (clock) {
+      var tick = function () { clock.textContent = new Date().toLocaleString(); };
+      tick();
+      setInterval(tick, 1000);
+    }
+    var path = window.location.pathname || "/";
+    var links = document.querySelectorAll(".nav a[href]");
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute("href") || "";
+      links[i].classList.toggle("active", href && href !== "/" && path.indexOf(href) === 0);
+    }
+  })();
+</script>
 </body>
 </html>
